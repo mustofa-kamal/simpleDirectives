@@ -1,90 +1,62 @@
 angular.module('components', [])
- 
-  .directive('accordions', function() {
-    return {
-      restrict: 'E',
-      transclude: true,
-      scope: {},
+
+.directive('accordions', function() {
+  return {
+      restrict: 'E', //compiler will match element only
+      transclude: true, 
+      scope: {},//new empty scope, no inheritance -> makes this directive independent as per as scope is concerned 
+
+      /* Compiler will call this controller once; because there is a single accordions element. Therefore a good place for initialization */ 
       controller: function($scope, $element) {
-        var accordions = $scope.accordions = [];
- 
-        $scope.select = function(accordion) {
-          angular.forEach(accordions, function(accordion) {
+         this.accordions = []; // array for accordion scope. 
+
+        this.addAccordion = function(accordion) { // For each instance of accordion instance, this function is called with respective accordion scope 
+          if (this.accordions.length == 0) this.select(accordion);
+          this.accordions.push(accordion);
+        }
+
+        this.select = function(accordion) { //accordion is an alias for accordion scope. 
+          angular.forEach(this.accordions, function(accordion) {
             accordion.selected = false;
           });
           accordion.selected = true;
         }
- 
-        this.addAccordion = function(accordion) {
-          if (accordions.length == 0) $scope.select(accordion);
-          accordions.push(accordion);
-        }
-
-        this.getAccordions = function() {
-           return $scope.accordions;
-        }
-
-        this.getpScope = function() {
-           return $scope;
-        }
-
       },
       template:'<div class="panel-group" id="accordion" ng-transclude></div>',
       replace: true
     };
   })
- 
-  .directive('accordion', function() {
-    return {
-      require: '^accordions',
-      restrict: 'E',
-      transclude: true,
-      scope: { title: '@'},
+
+.directive('accordion', function() {
+  return {
+    require: '^accordions', //accordions controller object will be passed as 4th argument in link function. 
+    restrict: 'E',
+    transclude: true,
+      /*scope is initialized with title. title will receive value from <accordion title="xxxx">. Instead of this we could also do the following:
+      scope: {}, and inside the link function, scope.title=attrs.title
+      */
+      scope: { title: '@'}, 
       link: function(scope, element, attrs, accordionsCtrl) {
-        accordionsCtrl.addAccordion(scope);
-        scope.thisScope = scope;
-        scope.panelCollapse='panel-collapse';
-        
-        scope.test = function(accordion) {
-        
-         var y = accordionsCtrl.getAccordions();
+        accordionsCtrl.addAccordion(scope);// adding accordion scope for each instances of accordion. 
+        scope.panelCollapse='panel-collapse';//adding css
 
-         var z = accordionsCtrl.getpScope();
-
-         z.select(accordion);
-
-         var k=scope;
-
-         var c=1;
-
-
-
-
-
-
-
+        scope.select = function(){ //ng-click="select()" parsed in respect to a context and in this case it is scope object. So 'this' denotes scope object
+          accordionsCtrl.select(this);
         }
       },
-
-
-     
-
       template:
-       
-
-    '<div class="panel panel-default">'+
-    '<div class="panel-heading">'+
+      '<div class="panel panel-default">'+
+      '<div class="panel-heading">'+
       '<h4 class="panel-title">'+
-        '<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo">'+
-           '<a href="" ng-click="test(thisScope)">{{title}}</a>' +
-        '</a><i class="indicator glyphicon glyphicon-chevron-up  pull-right"></i>'+
+      '<a class="accordion-toggle" data-toggle="collapse" >'+
+      '<a href="" ng-click="select()">{{title}}</a>' +
       '</h4>'+
-    '</div>' +
-    '<div id="collapseTwo"  ng-class="{panelCollapse:true, collapse:true, in: selected}">'+
+      '</div>' +
+      '<div id="collapseTwo"  ng-class="{panelCollapse:true, collapse:true, in: selected}">'+
       '<div class="panel-body" ng-transclude>'+
       '</div>'+
-    '</div>'+
-    '</div>',
+      '</div>'+
+      '</div>',
       replace: true
     };
   })
