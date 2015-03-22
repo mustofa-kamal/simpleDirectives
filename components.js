@@ -39,8 +39,9 @@ angular.module('components', [])
       link: function(scope, element, attrs, accordionsCtrl) {
         accordionsCtrl.addAccordion(scope);// adding accordion scope for each instances of accordion. 
         scope.panelCollapse='panel-collapse';//adding css
-
-        scope.select = function(){ //used by ng-click="select()" where select is an expression which is parsed in respect to a context and in this case it is scope object. So 'this' denotes scope object
+        /*Used by ng-click="select()" where select is an expression which is parsed in respect to a context and in this case it is scope object. 
+        So 'this' denotes scope object. "In Angular, expressions are evaluated against a scope object." - ref: https://docs.angularjs.org/guide/expression*/
+        scope.select = function(){ 
           accordionsCtrl.select(this);
         }
       },
